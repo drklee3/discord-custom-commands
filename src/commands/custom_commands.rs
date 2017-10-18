@@ -151,9 +151,16 @@ command!(stat(ctx, msg, args) {
   let mut data = ctx.data.lock();
   let db = data.get_mut::<sqlite::Database>().unwrap();
 
-  let cmd = try!(db.get(&name));
+  let cmd = match db.get(&name) {
+    Ok(val) => val,
+    Err(e) => {
+      let _ = msg.channel_id.say(&format!("Error: {}", e));
+      return Ok(());
+    }
+  };
 
-  let _ = msg.channel_id.say(&format!("Stats for `{}`:\nUsed {} times\nCreated {}", name, cmd.stat, cmd.created));
+  let _ = msg.channel_id.say(&format!("Stats for `{}`:\nUrl:{} \nUsed {} times\nAdded on {}\n \
+    Added by {}", name, cmd.url, cmd.stat, cmd.created, cmd.owner));
 });
 
 command!(search(ctx, msg, args) {
