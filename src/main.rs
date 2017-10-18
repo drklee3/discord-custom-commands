@@ -22,6 +22,8 @@ use std::collections::HashMap;
 use typemap::Key;
 use sqlite::Database;
 
+const PREFIX: &'static str = "~";
+
 struct Handler;
 
 struct CommandCounter;
@@ -35,9 +37,20 @@ impl Key for Database {
 }
 
 impl EventHandler for Handler {
-    fn on_message(&self, _: Context, msg: Message) {
-        if msg.content == "!test" {
-            if let Err(why) = msg.channel_id.say("Hello!") {
+    fn on_message(&self, ctx: Context, msg: Message) {
+        if msg.content.starts_with(PREFIX) {
+            let mut data = ctx.data.lock();
+            let db = data.get_mut::<sqlite::Database>().unwrap();
+
+            let command = match db.get(&msg.content[1..].to_string()) {
+                Ok(val) => val,
+                _ => {
+                    // no custom command found
+                    return;
+                },
+            };
+
+            if let Err(why) = msg.channel_id.say(command.url) {
                 error!("Error when sending message: {:?}", why);
             }
         }
@@ -70,7 +83,7 @@ fn main() {
     }
 
     client.with_framework(StandardFramework::new()
-        .configure(|c| c.prefix("~"))
+        .configure(|c| c.prefix(PREFIX))
 
         .before(|ctx, msg, command_name| {
             println!("Got command '{}' by user '{}'",
