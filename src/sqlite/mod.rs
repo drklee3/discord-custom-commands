@@ -57,11 +57,11 @@ impl Database {
             let row = try!(result_row);
 
             let cmd = CustomCommand {
-                name: row.get(0),
-                url: row.get(1),
-                owner: row.get(2),
-                stat: row.get(3),
-                created: row.get(4)
+                name: row.get(1),
+                url: row.get(2),
+                owner: row.get(3),
+                stat: row.get(4),
+                created: row.get(5)
             };
 
             commands.push(cmd);
@@ -74,11 +74,11 @@ impl Database {
         let conn = &self.conn.lock().unwrap();
         let mut stmt = try!(conn.prepare_cached("SELECT * FROM commands WHERE name = ?"));
         let row = try!(stmt.query_row(&[name], |row| CustomCommand {
-            name: row.get(0),
-            url: row.get(1),
-            owner: row.get(2),
-            stat: row.get(3),
-            created: row.get(4)
+            name: row.get(1),
+            url: row.get(2),
+            owner: row.get(3),
+            stat: row.get(4),
+            created: row.get(5)
         }));
 
         Ok(row)
@@ -86,7 +86,7 @@ impl Database {
 
     pub fn search(&self, search: &String) -> Result<Vec<CustomCommand>, Error> {
         let conn = &self.conn.lock().unwrap();
-        let mut stmt = try!(conn.prepare_cached("SELECT FROM commands WHERE name LIKE ?1 or LIKE %?1%"));
+        let mut stmt = try!(conn.prepare_cached("SELECT name FROM commands WHERE name LIKE ?1 or LIKE %?1%"));
         let mut rows = try!(stmt.query(&[search]));
 
         let mut commands = Vec::new();
@@ -94,11 +94,11 @@ impl Database {
             let row = try!(result_row);
 
             let cmd = CustomCommand {
-                name: row.get(0),
-                url: row.get(1),
-                owner: row.get(2),
-                stat: row.get(3),
-                created: row.get(4)
+                name: row.get(1),
+                url: row.get(2),
+                owner: row.get(3),
+                stat: row.get(4),
+                created: row.get(5)
             };
 
             commands.push(cmd);
@@ -116,7 +116,8 @@ impl Database {
 
         let owner = owner as i64;
 
-        try!(stmt.execute_named(&[(":name", name), (":url", url), (":owner", &owner), (":stat", &0), (":created", &current_time.tm_sec)]));
+        try!(stmt.execute_named(&[(":name", name), (":url", url), (":owner", &owner),
+                                  (":stat", &0), (":created", &current_time.tm_sec)]));
 
         Ok(())
     }
