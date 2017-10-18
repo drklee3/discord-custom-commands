@@ -86,7 +86,8 @@ impl Database {
 
     pub fn search(&self, search: &String) -> Result<Vec<CustomCommand>, Error> {
         let conn = &self.conn.lock().unwrap();
-        let mut stmt = try!(conn.prepare_cached("SELECT * FROM commands WHERE name LIKE ?1 or name LIKE ?2"));
+        let mut stmt = try!(conn.prepare_cached("SELECT * FROM commands WHERE name LIKE ?1 \
+                                                 or name LIKE ?2 ORDER BY LOWER(name)"));
         let search_loose = format!("%{}%", search);
         let mut rows = try!(stmt.query(&[search, &search_loose]));
 
@@ -110,7 +111,7 @@ impl Database {
 
     pub fn add(&self, name: &String, url: &String, owner: u64) -> Result<(), Error> {
         let conn = &self.conn.lock().unwrap();
-        let mut stmt = try!(conn.prepare_cached("INSERT INTO commands (name, url, owner, stat, created) 
+        let mut stmt = try!(conn.prepare_cached("INSERT INTO commands (name, url, owner, stat, created) \
                                                       VALUES (:name, :url, :owner, :stat, :created)"));
 
         let current_time = time::get_time();
@@ -131,10 +132,10 @@ impl Database {
         Ok(())
     }
 
-    pub fn edit(&self, name: String, new_name: String, new_url: String) -> Result<(), Error> {
+    pub fn edit(&self, name: &String, new_name: &String, new_url: &String) -> Result<(), Error> {
         let conn = &self.conn.lock().unwrap();
         let mut stmt = try!(conn.prepare_cached("UPDATE commands SET name = :new_name, url = :new_url WHERE name = :name"));
-        try!(stmt.execute_named(&[(":new_name", &new_name), (":new_url", &new_url), (":name", &name)]));
+        try!(stmt.execute_named(&[(":new_name", new_name), (":new_url", new_url), (":name", name)]));
 
         Ok(())
     }
