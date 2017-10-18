@@ -119,16 +119,30 @@ fn main() {
         .command("cmdcount", |c| c.exec(commands::meta::commands))
         .group("Custom Commands", |g| g
             .command("commands", |c| c
+                .usage("~commands")
+                .description("Lists all available commands")
                 .exec(commands::custom_commands::commands))
             .command("add", |c| c
+                .usage("~add [name] [url]")
+                .description("Adds a custom command")
                 .exec(commands::custom_commands::add))
             .command("delete", |c| c
+                .usage("~delete [name]")
+                .description("Deletes a custom command.  Limited to the
+                    creator of a command or members with MANAGE_GUILD permissions.")
                 .exec(commands::custom_commands::delete))
             .command("edit", |c| c
+                .usage("~edit [name] [new name] [new url]")
+                .description("Edits an existing command.  Limited to the
+                    creator of a command or members with MANAGE_GUILD permissions.")
                 .exec(commands::custom_commands::edit))
             .command("stat", |c| c
+                .usage("~stat [name]")
+                .description("Shows informatino about a custom command.")
                 .exec(commands::custom_commands::stat))
             .command("search", |c| c
+                .usage("~search [name]")
+                .description("Searches for a custom command.")
                 .exec(commands::custom_commands::search)))
         );
 
