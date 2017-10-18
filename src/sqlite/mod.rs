@@ -49,7 +49,7 @@ impl Database {
 
     pub fn all(&self) -> Result<Vec<CustomCommand>, Error> {
         let conn = &self.conn.lock().unwrap();
-        let mut stmt = try!(conn.prepare_cached("SELECT * FROM commands"));
+        let mut stmt = try!(conn.prepare_cached("SELECT * FROM commands ORDER BY LOWER(name)"));
         let mut rows = try!(stmt.query(&[]));
 
         let mut commands = Vec::new();
@@ -112,12 +112,12 @@ impl Database {
         let mut stmt = try!(conn.prepare_cached("INSERT INTO commands (name, url, owner, stat, created) 
                                                       VALUES (:name, :url, :owner, :stat, :created)"));
 
-        let current_time = time::now();
+        let current_time = time::get_time();
 
         let owner = owner as i64;
 
         try!(stmt.execute_named(&[(":name", name), (":url", url), (":owner", &owner),
-                                  (":stat", &0), (":created", &current_time.tm_sec)]));
+                                  (":stat", &0), (":created", &current_time)]));
 
         Ok(())
     }
