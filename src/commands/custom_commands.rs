@@ -130,7 +130,9 @@ command!(edit(ctx, msg, args) {
     let cmd = try!(db.get(&name));
 
     if cmd.is_owner(msg.author.id.0) || has_permission(msg) {
-      try!(db.edit(name, new_name, new_url));
+      try!(db.edit(&name, &new_name, &new_url));
+      let _ = msg.channel_id.say(&format!("The command `{}` has been updated with the 
+                            name `{}` and response `{}`.", name, new_name, new_url));
     }
   } else {
     let _ = msg.channel_id.say(&format!("The command `{}` was not found.", name));
