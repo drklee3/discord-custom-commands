@@ -36,7 +36,7 @@ impl Key for Database {
 
 impl EventHandler for Handler {
     fn on_message(&self, _: Context, msg: Message) {
-        if msg.content == "!annyeong" {
+        if msg.content == "!test" {
             if let Err(why) = msg.channel_id.say("Hello!") {
                 error!("Error when sending message: {:?}", why);
             }
@@ -70,7 +70,7 @@ fn main() {
     }
 
     client.with_framework(StandardFramework::new()
-        .configure(|c| c.prefix("!"))
+        .configure(|c| c.prefix("~"))
 
         .before(|ctx, msg, command_name| {
             println!("Got command '{}' by user '{}'",
@@ -103,7 +103,7 @@ fn main() {
             .max_args(2)
             .usage("~multiply [number] [number]")
             .exec(commands::math::multiply))
-        .command("commands", |c| c.exec(commands::meta::commands))
+        .command("cmdcount", |c| c.exec(commands::meta::commands))
         .group("Custom Commands", |g| g
             .command("commands", |c| c
                 .exec(commands::custom_commands::commands))
