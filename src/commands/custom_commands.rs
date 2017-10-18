@@ -2,7 +2,7 @@ use sqlite;
 use std::fmt::Write;
 use serenity::model::Message;
 
-const GUILD_ID: u64 = 167058919611564043;
+const HOME_GUILD_ID: u64 = 167058919611564043;
 
 fn has_permission(msg: &Message) -> bool {
   let guild = match msg.guild() {
@@ -15,7 +15,7 @@ fn has_permission(msg: &Message) -> bool {
   };
   let guild = guild.read().unwrap();
 
-  if guild.id.0 != GUILD_ID {
+  if guild.id.0 != HOME_GUILD_ID {
     return false;
   }
 
@@ -47,6 +47,15 @@ command!(commands(ctx, msg, _args) {
 });
 
 command!(add(ctx, msg, args) {
+  // limit command adding to the main guild
+  if let Some(guild_id) = msg.guild_id() {
+    if guild_id != HOME_GUILD_ID {
+      return Ok(());
+    }
+  } else { // return if no guild found
+    return Ok(()); 
+  }
+
   let name = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
@@ -159,8 +168,8 @@ command!(stat(ctx, msg, args) {
     }
   };
 
-  let _ = msg.channel_id.say(&format!("Stats for `{}`:\nUrl:{} \nUsed {} times\nAdded on {}\n \
-    Added by {}", name, cmd.url, cmd.stat, cmd.created, cmd.owner));
+  let _ = msg.channel_id.say(&format!("Stats for `{}`:\nUrl: <{}> \nUsed {} times\nAdded on {}\n \
+    Added by <@{}>", name, cmd.url, cmd.stat, cmd.created, cmd.owner));
 });
 
 command!(search(ctx, msg, args) {

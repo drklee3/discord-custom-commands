@@ -18,19 +18,12 @@ use serenity::framework::StandardFramework;
 use serenity::framework::standard::help_commands;
 use dotenv::dotenv;
 use std::env;
-use std::collections::HashMap;
 use typemap::Key;
 use sqlite::Database;
 
 const PREFIX: &'static str = "~";
 
 struct Handler;
-
-struct CommandCounter;
-
-impl Key for CommandCounter {
-    type Value = HashMap<String, u64>;
-}
 
 impl Key for Database {
     type Value = Database;
@@ -50,6 +43,9 @@ impl EventHandler for Handler {
                 },
             };
 
+            println!("Got custom command '{}' by user '{}'",
+                     command.name, msg.author.name);
+
             if let Err(why) = msg.channel_id.say(command.url) {
                 error!("Error when sending message: {:?}", why);
             }
@@ -64,7 +60,7 @@ impl EventHandler for Handler {
 fn main() {
     dotenv().ok();
 
-    env_logger::init();
+    let _ = env_logger::init();
     info!("Starting...");
 
     // Configure the client with your Discord bot token in the environment.
@@ -74,7 +70,6 @@ fn main() {
 
     {
         let mut data = client.data.lock();
-        data.insert::<CommandCounter>(HashMap::default());
 
         match sqlite::connect() {
             Ok(db) => data.insert::<Database>(db),
@@ -82,21 +77,18 @@ fn main() {
         };
     }
 
-    client.with_framework(StandardFramework::new()
-        .configure(|c| c.prefix(PREFIX))
+    let invite_link = env::var("INVITE_LINK")
+        .expect("Expected an invite link in the environment");
 
-        .before(|ctx, msg, command_name| {
+    client.with_framework(StandardFramework::new()
+        .configure(|c| c
+            .prefix(PREFIX)
+            .owners(vec![UserId(150443906511667200)].into_iter().collect()))
+
+        .before(|_ctx, msg, command_name| {
             println!("Got command '{}' by user '{}'",
                      command_name,
                      msg.author.name);
-
-            // Increment the number of times this command has been run once. If
-            // the command's name does not exist in the counter, add a default
-            // value of 0.
-            let mut data = ctx.data.lock();
-            let counter = data.get_mut::<CommandCounter>().unwrap();
-            let entry = counter.entry(command_name.to_string()).or_insert(0);
-            *entry += 1;
 
             true // if `before` returns false, command processing doesn't happen.
         })
@@ -108,15 +100,24 @@ fn main() {
             }
         })
 
-        .command("help", |c| c.exec_help(help_commands::with_embeds))
-        .command("ping", |c| c.exec(commands::meta::ping))
-        .command("latency", |c| c.exec(commands::meta::latency))
-        .command("multiply", |c| c
-            .min_args(2)
-            .max_args(2)
-            .usage("~multiply [number] [number]")
-            .exec(commands::math::multiply))
-        .command("cmdcount", |c| c.exec(commands::meta::commands))
+        .group("Meta", |g| g
+            .command("help", |c| c.exec_help(help_commands::with_embeds))
+            .command("ping", |c| c.exec_str("Pong!"))
+            .command("latency", |c| c
+                .usage("~latency")
+                .desc("Calculates the heartbeat latency between the shard and the gateway.")
+                .exec(commands::meta::latency))
+            .command("info", |c| c
+                .usage("~info")
+                .desc("Gives info about the bot.")
+                .exec_str(&format!("Hi!  I'm a bot written by tzuwy#7080 with Rust and serenity-rs.\n\
+                    If you'd like to add me to another server, here's an invite link: <{}>\n\
+                    Commands can be only added in the BLACKPINK server though!", invite_link)))
+            .command("shutdown", |c| c
+                .usage("~shutdown")
+                .desc("Gracefully shuts down the bot.")
+                .owners_only(true)
+                .exec(commands::meta::shutdown)))
         .group("Custom Commands", |g| g
             .command("commands", |c| c
                 .usage("~commands")
