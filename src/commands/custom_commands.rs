@@ -1,9 +1,36 @@
 use sqlite;
 use std::fmt::Write;
+use serenity::model::Message;
 
-// fn hasPermission(id: u64, command: sqlite::CustomCommand) {
-// 
-// }
+const GUILD_ID: u64 = 167058919611564043;
+
+fn has_permission(msg: &Message) -> bool {
+  let guild = match msg.guild() {
+      Some(guild) => guild,
+      None => {
+          warn!("Couldn't get message guild!");
+
+          return false;
+      }
+  };
+  let guild = guild.read().unwrap();
+
+  if guild.id.0 != GUILD_ID {
+    return false;
+  }
+
+  // fetch member
+  let member = match guild.members.get(&msg.author.id) {
+      Some(member) => member,
+      None => return false
+  };
+  // check if has perm
+  if let Ok(permissions) = member.permissions() {
+    return permissions.manage_guild();
+  } else {
+    return false;
+  }
+}
 
 command!(commands(ctx, msg, _args) {
   let mut data = ctx.data.lock();
@@ -63,7 +90,7 @@ command!(delete(ctx, msg, args) {
   if try!(db.is_command(&name)) {
     let cmd = try!(db.get(&name));
 
-    if cmd.is_owner(msg.author.id.0) {
+    if cmd.is_owner(msg.author.id.0) || has_permission(msg) {
       try!(db.delete(&name));
     }
   } else {
@@ -99,7 +126,15 @@ command!(edit(ctx, msg, args) {
   let mut data = ctx.data.lock();
   let db = data.get_mut::<sqlite::Database>().unwrap();
 
-  try!(db.edit(name, new_name, new_url));
+  if try!(db.is_command(&name)) {
+    let cmd = try!(db.get(&name));
+
+    if cmd.is_owner(msg.author.id.0) || has_permission(msg) {
+      try!(db.edit(name, new_name, new_url));
+    }
+  } else {
+    let _ = msg.channel_id.say(&format!("The command `{}` was not found.", name));
+  }  
 });
 
 command!(stat(ctx, msg, args) {
