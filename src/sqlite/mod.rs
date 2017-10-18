@@ -114,7 +114,7 @@ impl Database {
         let mut stmt = try!(conn.prepare_cached("INSERT INTO commands (name, url, owner, stat, created) \
                                                       VALUES (:name, :url, :owner, :stat, :created)"));
 
-        let current_time = time::get_time();
+        let current_time = time::get_time().sec;
 
         let owner = owner as i64;
 
