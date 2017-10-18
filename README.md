@@ -13,9 +13,11 @@ Mainly for learning purposes.
 ~add [name] [url]
     Adds a custom command
 ~delete [name]
-    Deletes a custom command.  Limited to the creator of a command or members with MANAGE_GUILD permissions.
+    Deletes a custom command.
+    Limited to the creator of a command or members with MANAGE_GUILD permissions.
 ~edit [name] [new name] [new url]
-    Edits an existing command.  Limited to the creator of a command or members with MANAGE_GUILD permissions.
+    Edits an existing command.
+    Limited to the creator of a command or members with MANAGE_GUILD permissions.
 ~stat [name]
     Shows informatino about a custom command.
 ~search [name]
