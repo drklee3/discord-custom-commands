@@ -1,4 +1,33 @@
-command!(add(_ctx, msg, args) {
+use sqlite;
+use std::fmt::Write;
+
+// fn hasPermission(id: u64, command: sqlite::CustomCommand) {
+// 
+// }
+
+command!(commands(ctx, msg, _args) {
+  let mut data = ctx.data.lock();
+  let db = data.get_mut::<sqlite::Database>().unwrap();
+
+  let commands = try!(db.all());
+
+  let mut contents = "Custom Commands:\n".to_string();
+  for cmd in commands {
+      let _ = write!(contents, "- {}\n", name=cmd.name);
+  }
+
+  let _ = msg.channel_id.say(&contents);
+});
+
+command!(add(ctx, msg, args) {
+  let name = match args.single::<String>() {
+    Ok(val) => val,
+    Err(why) => {
+      let _ = msg.channel_id.say(&format!("Error: {}", why));
+      return Ok(());
+    },
+  };
+
   let url = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
@@ -7,6 +36,107 @@ command!(add(_ctx, msg, args) {
     },
   };
 
-  let _ = msg.channel_id.say(url);
+  let mut data = ctx.data.lock();
+  let db = data.get_mut::<sqlite::Database>().unwrap();
 
+  if !try!(db.is_command(&name)) {
+    try!(db.add(&name, &url, msg.author.id.0));
+    let _ = msg.channel_id.say(&format!("The command `{}` has been added with the response `{}`", name, url));
+  } else {
+    let _ = msg.channel_id.say(&format!("The command `{}` already exists!", name));
+  }
+});
+
+
+command!(delete(ctx, msg, args) {
+  let name = match args.single::<String>() {
+    Ok(val) => val,
+    Err(why) => {
+      let _ = msg.channel_id.say(&format!("Error: {}", why));
+      return Ok(());
+    },
+  };
+
+  let mut data = ctx.data.lock();
+  let db = data.get_mut::<sqlite::Database>().unwrap();
+
+  if try!(db.is_command(&name)) {
+    let cmd = try!(db.get(&name));
+
+    if cmd.is_owner(msg.author.id.0) {
+      try!(db.delete(&name));
+    }
+  } else {
+    let _ = msg.channel_id.say(&format!("The command `{}` was not found.", name));
+  }  
+});
+
+command!(edit(ctx, msg, args) {
+  let name = match args.single::<String>() {
+    Ok(val) => val,
+    Err(why) => {
+      let _ = msg.channel_id.say(&format!("Error: {}", why));
+      return Ok(());
+    },
+  };
+
+  let new_name = match args.single::<String>() {
+    Ok(val) => val,
+    Err(why) => {
+      let _ = msg.channel_id.say(&format!("Error: {}", why));
+      return Ok(());
+    },
+  };
+
+  let new_url = match args.single::<String>() {
+    Ok(val) => val,
+    Err(why) => {
+      let _ = msg.channel_id.say(&format!("Error: {}", why));
+      return Ok(());
+    },
+  };
+
+  let mut data = ctx.data.lock();
+  let db = data.get_mut::<sqlite::Database>().unwrap();
+
+  try!(db.edit(name, new_name, new_url));
+});
+
+command!(stat(ctx, msg, args) {
+  let name = match args.single::<String>() {
+    Ok(val) => val,
+    Err(why) => {
+      let _ = msg.channel_id.say(&format!("Error: {}", why));
+      return Ok(());
+    },
+  };
+
+  let mut data = ctx.data.lock();
+  let db = data.get_mut::<sqlite::Database>().unwrap();
+
+  let cmd = try!(db.get(&name));
+
+  let _ = msg.channel_id.say(&format!("Stats for `{}`:\nUsed {} times\nCreated {}", name, cmd.stat, cmd.created));
+});
+
+command!(search(ctx, msg, args) {
+  let search = match args.single::<String>() {
+    Ok(val) => val,
+    Err(why) => {
+      let _ = msg.channel_id.say(&format!("Error: {}", why));
+      return Ok(());
+    },
+  };
+
+  let mut data = ctx.data.lock();
+  let db = data.get_mut::<sqlite::Database>().unwrap();
+
+  let results = try!(db.search(&search));
+
+  let mut contents = "Search Results:\n".to_string();
+  for cmd in results {
+      let _ = write!(contents, "- {}\n", name=cmd.name);
+  }
+
+  let _ = msg.channel_id.say(&contents);
 });

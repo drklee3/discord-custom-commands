@@ -1,3 +1,5 @@
 /target/
 **/*.rs.bk
 .env
+*.sqlite3
+*.sublime*
