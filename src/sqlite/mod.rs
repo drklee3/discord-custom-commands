@@ -86,8 +86,9 @@ impl Database {
 
     pub fn search(&self, search: &String) -> Result<Vec<CustomCommand>, Error> {
         let conn = &self.conn.lock().unwrap();
-        let mut stmt = try!(conn.prepare_cached("SELECT name FROM commands WHERE name LIKE ?1 or LIKE %?1%"));
-        let mut rows = try!(stmt.query(&[search]));
+        let mut stmt = try!(conn.prepare_cached("SELECT * FROM commands WHERE name LIKE ?1 or name LIKE ?2"));
+        let search_loose = format!("%{}%", search);
+        let mut rows = try!(stmt.query(&[search, &search_loose]));
 
         let mut commands = Vec::new();
         while let Some(result_row) = rows.next() {
