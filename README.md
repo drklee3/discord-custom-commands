@@ -22,6 +22,8 @@ Meta
 Custom Commands
   ~commands
     Lists all available commands
+  ~top
+    Lists the top 10 most used commands
   ~add [name] [url]
     Adds a custom command
   ~delete [name]
