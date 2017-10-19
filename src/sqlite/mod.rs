@@ -80,6 +80,29 @@ impl Database {
         Ok(commands)
     }
 
+    pub fn top(&self) -> Result<Vec<CustomCommand>, Error> {
+        let conn = &self.conn.lock().unwrap();
+        let mut stmt = try!(conn.prepare_cached("SELECT * FROM commands ORDER BY stat DESC"));
+        let mut rows = try!(stmt.query(&[]));
+
+        let mut commands = Vec::new();
+        while let Some(result_row) = rows.next() {
+            let row = try!(result_row);
+
+            let cmd = CustomCommand {
+                name: row.get(1),
+                url: row.get(2),
+                owner: row.get(3),
+                stat: row.get(4),
+                created: row.get(5)
+            };
+
+            commands.push(cmd);
+        }
+
+        Ok(commands)
+    }
+
     pub fn get(&self, name: &String) -> Result<CustomCommand, Error> {
         let conn = &self.conn.lock().unwrap();
         let mut stmt = try!(conn.prepare_cached("SELECT * FROM commands WHERE name = ?"));
@@ -93,6 +116,7 @@ impl Database {
 
         Ok(row)
     }
+
 
     pub fn search(&self, search: &String) -> Result<Vec<CustomCommand>, Error> {
         let conn = &self.conn.lock().unwrap();

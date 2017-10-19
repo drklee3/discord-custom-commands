@@ -124,6 +124,9 @@ fn main() {
             .command("commands", |c| c
                 .desc("Lists all available commands")
                 .exec(commands::custom_commands::commands))
+            .command("top", |c| c
+                .desc("Lists the top 10 most used commands")
+                .exec(commands::custom_commands::top))
             .command("add", |c| c
                 .usage("[name] [url]")
                 .desc("Adds a custom command")

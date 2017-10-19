@@ -39,9 +39,26 @@ command!(commands(ctx, msg, _args) {
 
   let commands = try!(db.all());
 
-  let mut contents = "Custom Commands:\n".to_string();
+  let mut contents = "Available Commands:\n".to_string();
   for cmd in commands {
-      let _ = write!(contents, "- {}\n", name=cmd.name);
+      let _ = write!(contents, "{}\n", cmd.name);
+  }
+
+  let _ = msg.channel_id.say(&contents);
+});
+
+command!(top(ctx, msg, _args) {
+  let mut data = ctx.data.lock();
+  let db = data.get_mut::<sqlite::Database>().unwrap();
+
+  let commands = try!(db.top());
+
+  let mut contents = "Most Used Commands:\n".to_string();
+
+  let commands = commands.iter().take(10);
+
+  for cmd in commands {
+      let _ = write!(contents, "{} - {}\n", cmd.stat, cmd.name);
   }
 
   let _ = msg.channel_id.say(&contents);
@@ -184,11 +201,11 @@ command!(stat(ctx, msg, args) {
           .value(&cmd.stat)
         )
         .field(|f| f
-          .name("Created on")
+          .name("Added on")
           .value(timestamp)
         )
         .field(|f| f
-          .name("Created by")
+          .name("Added by")
           .value(format!("<@{}>", &cmd.owner)
         ))));
 });
