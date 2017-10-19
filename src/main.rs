@@ -6,7 +6,7 @@ extern crate dotenv;
 extern crate log;
 extern crate env_logger;
 extern crate rusqlite;
-extern crate time;
+extern crate chrono;
 extern crate typemap;
 
 mod commands;
@@ -42,6 +42,11 @@ impl EventHandler for Handler {
                     return;
                 },
             };
+
+            match db.increment(&command) {
+                Ok(_) => {},
+                Err(why) => error!("Error occurred when incrementing custom command count: {}", why),
+            }
 
             println!("Got custom command '{}' by user '{}'",
                      command.name, msg.author.name);
@@ -104,45 +109,41 @@ fn main() {
             .command("help", |c| c.exec_help(help_commands::with_embeds))
             .command("ping", |c| c.exec_str("Pong!"))
             .command("latency", |c| c
-                .usage("~latency")
                 .desc("Calculates the heartbeat latency between the shard and the gateway.")
                 .exec(commands::meta::latency))
             .command("info", |c| c
-                .usage("~info")
                 .desc("Gives info about the bot.")
                 .exec_str(&format!("Hi!  I'm a bot written by tzuwy#7080 with Rust and serenity-rs.\n\
                     If you'd like to add me to another server, here's an invite link: <{}>\n\
                     Commands can be only added in the BLACKPINK server though!", invite_link)))
             .command("shutdown", |c| c
-                .usage("~shutdown")
                 .desc("Gracefully shuts down the bot.")
                 .owners_only(true)
                 .exec(commands::meta::shutdown)))
         .group("Custom Commands", |g| g
             .command("commands", |c| c
-                .usage("~commands")
                 .desc("Lists all available commands")
                 .exec(commands::custom_commands::commands))
             .command("add", |c| c
-                .usage("~add [name] [url]")
+                .usage("[name] [url]")
                 .desc("Adds a custom command")
                 .exec(commands::custom_commands::add))
             .command("delete", |c| c
-                .usage("~delete [name]")
+                .usage("[name]")
                 .desc("Deletes a custom command.  Limited to the
                     creator of a command or members with MANAGE_GUILD permissions.")
                 .exec(commands::custom_commands::delete))
             .command("edit", |c| c
-                .usage("~edit [name] [new name] [new url]")
+                .usage("[name] [new name] [new url]")
                 .desc("Edits an existing command.  Limited to the
                     creator of a command or members with MANAGE_GUILD permissions.")
                 .exec(commands::custom_commands::edit))
             .command("stat", |c| c
-                .usage("~stat [name]")
+                .usage("[name]")
                 .desc("Shows information about a custom command.")
                 .exec(commands::custom_commands::stat))
             .command("search", |c| c
-                .usage("~search [name]")
+                .usage("[name]")
                 .desc("Searches for a custom command.")
                 .exec(commands::custom_commands::search)))
         );

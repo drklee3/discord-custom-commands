@@ -1,6 +1,7 @@
 use sqlite;
 use std::fmt::Write;
 use serenity::model::Message;
+use chrono::prelude::*;
 
 const HOME_GUILD_ID: u64 = 167058919611564043;
 
@@ -168,8 +169,28 @@ command!(stat(ctx, msg, args) {
     }
   };
 
-  let _ = msg.channel_id.say(&format!("Stats for `{}`:\nUrl: <{}> \nUsed {} times\nAdded on {}\n \
-    Added by <@{}>", name, cmd.url, cmd.stat, cmd.created, cmd.owner));
+  let timestamp = Utc.timestamp(cmd.created as i64, 0).format("%Y-%m-%d %H:%M:%S").to_string();
+
+  let _ = msg.channel_id.send_message(|m| m
+      .embed(|e| e
+        .title(format!("Stats for {}", name))
+        .field(|f| f
+          .name("Url")
+          .value(&cmd.url)
+          .inline(false)
+        )
+        .field(|f| f
+          .name("Times used")
+          .value(&cmd.stat)
+        )
+        .field(|f| f
+          .name("Created on")
+          .value(timestamp)
+        )
+        .field(|f| f
+          .name("Created by")
+          .value(format!("<@{}>", &cmd.owner)
+        ))));
 });
 
 command!(search(ctx, msg, args) {

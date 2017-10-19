@@ -1,6 +1,6 @@
 use std::path::Path;
 use std::sync::Mutex;
-use time;
+use chrono::prelude::*;
 use rusqlite::{Connection, Error};
 
 pub struct CustomCommand {
@@ -45,6 +45,16 @@ impl Database {
         let conn = &self.conn.lock().unwrap();
         let mut stmt = try!(conn.prepare_cached("SELECT * FROM commands WHERE name = ?"));
         stmt.exists(&[name])
+    }
+
+    pub fn increment(&self, command: &CustomCommand) -> Result<(), Error> {
+        let conn = &self.conn.lock().unwrap();
+        let mut stmt = try!(conn.prepare_cached("UPDATE commands SET stat = ?1 WHERE name = ?2"));
+
+        let new_stat = command.stat + 1;
+        try!(stmt.execute(&[&new_stat, &command.name]));
+
+        Ok(())
     }
 
     pub fn all(&self) -> Result<Vec<CustomCommand>, Error> {
@@ -114,7 +124,7 @@ impl Database {
         let mut stmt = try!(conn.prepare_cached("INSERT INTO commands (name, url, owner, stat, created) \
                                                       VALUES (:name, :url, :owner, :stat, :created)"));
 
-        let current_time = time::get_time().sec;
+        let current_time = Utc::now().timestamp();
 
         let owner = owner as i64;
 

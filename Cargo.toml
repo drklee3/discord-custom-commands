@@ -8,7 +8,7 @@ serenity = "0.4"
 dotenv = "0.10.1"
 env_logger = "0.4.3"
 log = "0.3"
-time = "0.1.38"
+chrono = "0.4.0"
 typemap = "0.3.3"
 
 [dependencies.rusqlite]
