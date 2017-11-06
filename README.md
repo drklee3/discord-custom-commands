@@ -36,4 +36,6 @@ Custom Commands
     Shows informatino about a custom command.
   ~search [name]
     Searches for a custom command.
+  ~import [json]  (or attach a JSON file)
+    Imports command from json file or message.
 ```
