@@ -9,6 +9,11 @@ extern crate rusqlite;
 extern crate chrono;
 extern crate typemap;
 
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
+extern crate serde_json;
+
 mod commands;
 mod sqlite;
 
@@ -148,7 +153,12 @@ fn main() {
             .command("search", |c| c
                 .usage("[name]")
                 .desc("Searches for a custom command.")
-                .exec(commands::custom_commands::search)))
+                .exec(commands::custom_commands::search))
+            .command("import", |c| c
+                .usage("[json data]")
+                .desc("Imports commands from json.")
+                .owners_only(true)
+                .exec(commands::custom_commands::import)))
         );
 
     if let Err(why) = client.start() {

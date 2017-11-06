@@ -2,8 +2,16 @@ use sqlite;
 use std::fmt::Write;
 use serenity::model::Message;
 use chrono::prelude::*;
+use std::env;
+use serde_json;
+use serde_json::Value;
+use serde_json::Map;
 
-const HOME_GUILD_ID: u64 = 167058919611564043;
+fn home_guild() -> u64 {
+  env::var("HOME_GUILD_ID")
+    .expect("Expected a home guild ID in environment")
+    .parse::<u64>().unwrap()
+}
 
 fn has_permission(msg: &Message) -> bool {
   let guild = match msg.guild() {
@@ -16,7 +24,7 @@ fn has_permission(msg: &Message) -> bool {
   };
   let guild = guild.read().unwrap();
 
-  if guild.id.0 != HOME_GUILD_ID {
+  if guild.id.0 != home_guild() {
     return false;
   }
 
@@ -39,10 +47,12 @@ command!(commands(ctx, msg, _args) {
 
   let commands = try!(db.all());
 
-  let mut contents = "Available Commands:\n".to_string();
+  let mut contents = "```Available Commands:\n".to_string();
   for cmd in commands {
       let _ = write!(contents, "{}\n", cmd.name);
   }
+
+  let _ = write!(contents, "```");
 
   let _ = msg.channel_id.say(&contents);
 });
@@ -53,7 +63,7 @@ command!(top(ctx, msg, _args) {
 
   let commands = try!(db.top());
 
-  let mut contents = "Most Used Commands:\n".to_string();
+  let mut contents = "```Top 10 Most Used Commands:\n".to_string();
 
   let commands = commands.iter().take(10);
 
@@ -61,13 +71,15 @@ command!(top(ctx, msg, _args) {
       let _ = write!(contents, "{} - {}\n", cmd.stat, cmd.name);
   }
 
+  let _ = write!(contents, "```");
+
   let _ = msg.channel_id.say(&contents);
 });
 
 command!(add(ctx, msg, args) {
   // limit command adding to the main guild
   if let Some(guild_id) = msg.guild_id() {
-    if guild_id != HOME_GUILD_ID {
+    if guild_id != home_guild() {
       return Ok(());
     }
   } else { // return if no guild found
@@ -77,7 +89,7 @@ command!(add(ctx, msg, args) {
   let name = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {}", why));
+      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
       return Ok(());
     },
   };
@@ -85,7 +97,7 @@ command!(add(ctx, msg, args) {
   let url = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {}", why));
+      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
       return Ok(());
     },
   };
@@ -97,7 +109,7 @@ command!(add(ctx, msg, args) {
     try!(db.add(&name, &url, msg.author.id.0));
     let _ = msg.channel_id.say(&format!("The command `{}` has been added with the response `{}`", name, url));
   } else {
-    let _ = msg.channel_id.say(&format!("The command `{}` already exists!", name));
+    let _ = msg.channel_id.say(&format!("The command `{}` already exists! <:jennieSad:326016260443865089>", name));
   }
 });
 
@@ -106,7 +118,7 @@ command!(delete(ctx, msg, args) {
   let name = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {}", why));
+      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
       return Ok(());
     },
   };
@@ -121,7 +133,7 @@ command!(delete(ctx, msg, args) {
       try!(db.delete(&name));
     }
   } else {
-    let _ = msg.channel_id.say(&format!("The command `{}` was not found.", name));
+    let _ = msg.channel_id.say(&format!("The command `{}` was not found. <:jennieSad:326016260443865089>", name));
   }  
 });
 
@@ -129,7 +141,7 @@ command!(edit(ctx, msg, args) {
   let name = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {}", why));
+      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
       return Ok(());
     },
   };
@@ -137,7 +149,7 @@ command!(edit(ctx, msg, args) {
   let new_name = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {}", why));
+      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
       return Ok(());
     },
   };
@@ -145,7 +157,7 @@ command!(edit(ctx, msg, args) {
   let new_url = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {}", why));
+      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
       return Ok(());
     },
   };
@@ -162,7 +174,7 @@ command!(edit(ctx, msg, args) {
                             name `{}` and response `{}`.", name, new_name, new_url));
     }
   } else {
-    let _ = msg.channel_id.say(&format!("The command `{}` was not found.", name));
+    let _ = msg.channel_id.say(&format!("The command `{}` was not found. <:jennieSad:326016260443865089>", name));
   }  
 });
 
@@ -170,7 +182,7 @@ command!(stat(ctx, msg, args) {
   let name = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {}", why));
+      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
       return Ok(());
     },
   };
@@ -181,7 +193,7 @@ command!(stat(ctx, msg, args) {
   let cmd = match db.get(&name) {
     Ok(val) => val,
     Err(e) => {
-      let _ = msg.channel_id.say(&format!("Error: {}", e));
+      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", e));
       return Ok(());
     }
   };
@@ -214,7 +226,7 @@ command!(search(ctx, msg, args) {
   let search = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {}", why));
+      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
       return Ok(());
     },
   };
@@ -224,10 +236,67 @@ command!(search(ctx, msg, args) {
 
   let results = try!(db.search(&search));
 
-  let mut contents = "Search Results:\n".to_string();
+  let mut contents = "```Search Results:\n".to_string();
   for cmd in results {
       let _ = write!(contents, "- {}\n", name=cmd.name);
   }
 
+  let _ = write!(contents, "```");
+
   let _ = msg.channel_id.say(&contents);
+});
+
+
+#[derive(Serialize, Deserialize)]
+struct Command {
+  commands: Map<String, Value>,
+}
+
+command!(import(ctx, msg, args) {
+  let mut raw_json = args.full();
+
+  // try reading file
+  if raw_json.is_empty() && msg.attachments.len() > 0 {
+    let json_bytes = match msg.attachments[0].download() {
+      Ok(content) => content,
+      Err(why) => {
+        println!("Error downloading attachment: {:?}", why);
+        let _ = msg.channel_id.say("Error downloading attachment. <:jennieSad:326016260443865089>");
+
+        return Ok(());
+      },
+    };
+
+    raw_json = match String::from_utf8(json_bytes) {
+      Ok(content) => content,
+      Err(why) => {
+        let _ = msg.channel_id.say(&format!("Invalid UTF-8 sequence: {}", why));
+
+        return Ok(());
+      }
+    };
+  }
+
+  let imported: Command = match serde_json::from_str(&raw_json) {
+    Ok(val) => val,
+    Err(why) => {
+      let _ = msg.channel_id.say(&format!("Error parsing JSON: {} <:jennieSad:326016260443865089>", why));
+      return Ok(());
+    }
+  };
+
+  let mut data = ctx.data.lock();
+  let db = data.get_mut::<sqlite::Database>().unwrap();
+
+  let _ = msg.channel_id.say(&format!("Importing commands {}...", &imported.commands.len()));
+
+  for (key, value) in imported.commands.iter() {
+    if !try!(db.is_command(&key)) {
+      try!(db.add(&key, &value.as_str().unwrap().to_string(), 0000));
+    } else {
+      let _ = msg.channel_id.say(&format!("Error when importing `{}`: Command already exists. <:jennieSad:326016260443865089>", &key));
+    }
+  }
+
+  let _ = msg.channel_id.say("Finished import. <:jennieWink:333927559307984897>");
 });
