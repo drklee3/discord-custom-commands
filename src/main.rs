@@ -105,7 +105,7 @@ fn main() {
 
         .after(|_, _, command_name, error| {
             match error {
-                Ok(()) => println!("Processed command '{}'", command_name),
+                Ok(()) => {},
                 Err(why) => println!("Command '{}' returned error {:?}", command_name, why),
             }
         })
