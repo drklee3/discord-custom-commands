@@ -79,7 +79,8 @@ command!(top(ctx, msg, _args) {
 command!(add(ctx, msg, args) {
   // limit command adding to the main guild
   if let Some(guild_id) = msg.guild_id() {
-    if guild_id != home_guild() {
+    if guild_id.0 != home_guild() {
+      let _ = msg.channel_id.say("Commands can be only added in the BLACKPINK server!");
       return Ok(());
     }
   } else { // return if no guild found
@@ -89,7 +90,7 @@ command!(add(ctx, msg, args) {
   let name = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
+      let _ = msg.channel_id.say(&format!("Error: {}", why));
       return Ok(());
     },
   };
@@ -97,7 +98,7 @@ command!(add(ctx, msg, args) {
   let url = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
+      let _ = msg.channel_id.say(&format!("Error: {}", why));
       return Ok(());
     },
   };
@@ -109,7 +110,7 @@ command!(add(ctx, msg, args) {
     try!(db.add(&name, &url, msg.author.id.0));
     let _ = msg.channel_id.say(&format!("The command `{}` has been added with the response `{}`", name, url));
   } else {
-    let _ = msg.channel_id.say(&format!("The command `{}` already exists! <:jennieSad:326016260443865089>", name));
+    let _ = msg.channel_id.say(&format!("The command `{}` already exists!", name));
   }
 });
 
@@ -118,7 +119,7 @@ command!(delete(ctx, msg, args) {
   let name = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
+      let _ = msg.channel_id.say(&format!("Error: {}", why));
       return Ok(());
     },
   };
@@ -133,7 +134,7 @@ command!(delete(ctx, msg, args) {
       try!(db.delete(&name));
     }
   } else {
-    let _ = msg.channel_id.say(&format!("The command `{}` was not found. <:jennieSad:326016260443865089>", name));
+    let _ = msg.channel_id.say(&format!("The command `{}` was not found.", name));
   }  
 });
 
@@ -141,7 +142,7 @@ command!(edit(ctx, msg, args) {
   let name = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
+      let _ = msg.channel_id.say(&format!("Error: {}", why));
       return Ok(());
     },
   };
@@ -149,7 +150,7 @@ command!(edit(ctx, msg, args) {
   let new_name = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
+      let _ = msg.channel_id.say(&format!("Error: {}", why));
       return Ok(());
     },
   };
@@ -157,7 +158,7 @@ command!(edit(ctx, msg, args) {
   let new_url = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
+      let _ = msg.channel_id.say(&format!("Error: {}", why));
       return Ok(());
     },
   };
@@ -174,7 +175,7 @@ command!(edit(ctx, msg, args) {
                             name `{}` and response `{}`.", name, new_name, new_url));
     }
   } else {
-    let _ = msg.channel_id.say(&format!("The command `{}` was not found. <:jennieSad:326016260443865089>", name));
+    let _ = msg.channel_id.say(&format!("The command `{}` was not found.", name));
   }  
 });
 
@@ -182,7 +183,7 @@ command!(stat(ctx, msg, args) {
   let name = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
+      let _ = msg.channel_id.say(&format!("Error: {}", why));
       return Ok(());
     },
   };
@@ -193,7 +194,7 @@ command!(stat(ctx, msg, args) {
   let cmd = match db.get(&name) {
     Ok(val) => val,
     Err(e) => {
-      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", e));
+      let _ = msg.channel_id.say(&format!("Error: {}", e));
       return Ok(());
     }
   };
@@ -226,7 +227,7 @@ command!(search(ctx, msg, args) {
   let search = match args.single::<String>() {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error: {} <:jennieSad:326016260443865089>", why));
+      let _ = msg.channel_id.say(&format!("Error: {}", why));
       return Ok(());
     },
   };
@@ -261,7 +262,7 @@ command!(import(ctx, msg, args) {
       Ok(content) => content,
       Err(why) => {
         println!("Error downloading attachment: {:?}", why);
-        let _ = msg.channel_id.say("Error downloading attachment. <:jennieSad:326016260443865089>");
+        let _ = msg.channel_id.say("Error downloading attachment.");
 
         return Ok(());
       },
@@ -280,7 +281,7 @@ command!(import(ctx, msg, args) {
   let imported: Command = match serde_json::from_str(&raw_json) {
     Ok(val) => val,
     Err(why) => {
-      let _ = msg.channel_id.say(&format!("Error parsing JSON: {} <:jennieSad:326016260443865089>", why));
+      let _ = msg.channel_id.say(&format!("Error parsing JSON: {}", why));
       return Ok(());
     }
   };
@@ -294,9 +295,9 @@ command!(import(ctx, msg, args) {
     if !try!(db.is_command(&key)) {
       try!(db.add(&key, &value.as_str().unwrap().to_string(), 0000));
     } else {
-      let _ = msg.channel_id.say(&format!("Error when importing `{}`: Command already exists. <:jennieSad:326016260443865089>", &key));
+      let _ = msg.channel_id.say(&format!("Error when importing `{}`: Command already exists.", &key));
     }
   }
 
-  let _ = msg.channel_id.say("Finished import. <:jennieWink:333927559307984897>");
+  let _ = msg.channel_id.say("Finished import.");
 });
