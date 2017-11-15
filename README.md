@@ -33,7 +33,7 @@ Custom Commands
     Edits an existing command.
     Limited to the creator of a command or members with MANAGE_GUILD permissions.
   ~stat [name]
-    Shows informatino about a custom command.
+    Shows information about a custom command.
   ~search [name]
     Searches for a custom command.
   ~import [json]  (or attach a JSON file)
