@@ -9,5 +9,12 @@ command!(latency(ctx, msg) {
 });
 
 command!(shutdown(ctx) {
-  try!(ctx.quit())
+    match ctx.quit() {
+        Ok(()) => {
+            let _ = msg.reply("Shutting down. :wave:");
+        },
+        Err(why) => {
+            let _ = msg.reply(&format!("Failed to shutdown: {:?}", why));
+        }
+    }
 });
