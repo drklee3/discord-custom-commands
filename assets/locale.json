@@ -1,0 +1,20 @@
+{
+  "info": {
+    "command_added": "The command `{}` has been added with the response `{}`",
+    "command_updated": "The command `{}` has been updated with the name `{}` and response `{}`.",
+    "command_deleted": "The command `{}` has been deleted.",
+    "import_started": "Importing {} commands.",
+    "import_finished": "Finished import."
+  },
+  "error": {
+    "home_guild": "Commands can be only added in the BLACKPINK server!",
+    "command_exists": "The command `{}` already exists!",
+    "command_not_found": "The command `{}` was not found.",
+    "download_attachment": "Error downloading attachment: {:?}",
+    "utf8": "Invalid UTF-8 sequence: {}",
+    "json": "Error parsing JSON: {}",
+    "import": "Error when importing `{}`: Command already exists.",
+    "search_no_results": "No results found.",
+    "command_edit_no_permission": "You do not have permission to edit this command!"
+  }
+}

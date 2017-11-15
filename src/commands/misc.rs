@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use reqwest;
 use reqwest::header::ContentType;
 
