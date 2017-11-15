@@ -8,7 +8,7 @@ command!(latency(ctx, msg) {
     let _ = msg.channel_id.say(latency);
 });
 
-command!(shutdown(ctx) {
+command!(shutdown(ctx, msg) {
     match ctx.quit() {
         Ok(()) => {
             let _ = msg.reply("Shutting down. :wave:");
