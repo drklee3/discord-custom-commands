@@ -99,7 +99,10 @@ fn main() {
         };
     }
 
-    let invite_link = env::var("INVITE_LINK").expect("Expected an invite link in the environment");
+    let invite_link = env::var("INVITE_LINK").expect("Expected INVITE_LINK in the environment");
+    let owner_name = env::var("OWNER_NAME").expect("Expected OWNER_NAME in the environment");
+    let home_guild_name =
+        env::var("HOME_GUILD_NAME").expect("Expected HOME_GUILD_NAME in the environment");
 
     client.with_framework(
         StandardFramework::new()
@@ -133,10 +136,12 @@ fn main() {
                     })
                     .command("info", |c| {
                         c.desc("Gives info about the bot.").exec_str(&format!(
-                            "Hi!  I'm a bot written by tzuwy#7080 with Rust and serenity-rs.\n\
+                            "Hi!  I'm a bot written by {} with Rust and serenity-rs.\n\
                     If you'd like to add me to another server, here's an invite link: <{}>\n\
-                    Commands can be only added in the BLACKPINK server though!",
-                            invite_link
+                    Commands can be only added in the {} server though!",
+                            owner_name,
+                            invite_link,
+                            home_guild_name
                         ))
                     })
                     .command("shutdown", |c| {
