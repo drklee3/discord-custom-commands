@@ -37,5 +37,9 @@ Custom Commands
   ~search [name]
     Searches for a custom command.
   ~import [json]  (or attach a JSON file)
-    Imports command from json file or message.
+    Imports command from json file or message.  Deletes all existing commands.
+
+Misc
+  ~play [code block]
+    Evaluates Rust code in the playground.
 ```
