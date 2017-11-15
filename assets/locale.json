@@ -14,6 +14,7 @@
     "utf8": "Invalid UTF-8 sequence: {}",
     "json": "Error parsing JSON: {}",
     "import_existing": "Finished import.  There were {} commands that already exist.",
+    "import_delete_all": "Failed to delete exiting commands: {}",
     "search_no_results": "No results found.",
     "command_edit_no_permission": "You do not have permission to edit this command!"
   }
