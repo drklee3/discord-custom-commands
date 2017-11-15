@@ -210,7 +210,7 @@ command!(stat(ctx, msg, args) {
             .embed(|e| e
                 .title(format!("Stats for {}", name))
                 .field(|f| f
-                    .name("Url")
+                    .name("Response")
                     .value(&cmd.url)
                     .inline(false)
                 )
@@ -302,6 +302,14 @@ command!(import(ctx, msg, args) {
 
     let _ = msg.channel_id.say(helpers::get_info_f("import_started", &[&imported.commands.len().to_string()]));
     let mut existing = 0;
+
+    match db.delete_all() {
+        Ok(()) => {},
+        Err(why) => {
+            let _ = msg.channel_id.say(helpers::get_error_f("import_delete_all", &[&why.to_string()]));
+            return Ok(());
+        }
+    };
 
     for (key, value) in imported.commands.iter() {
         if !try!(db.is_command(&key)) {

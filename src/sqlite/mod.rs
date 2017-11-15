@@ -166,6 +166,14 @@ impl Database {
         Ok(())
     }
 
+    pub fn delete_all(&self) -> Result<(), Error> {
+        let conn = &self.conn.lock().unwrap();
+        let mut stmt = try!(conn.prepare_cached("DELETE FROM commands"));
+        try!(stmt.execute(&[]));
+
+        Ok(())
+    }
+
     pub fn edit(&self, name: &String, new_name: &String, new_url: &String) -> Result<(), Error> {
         let conn = &self.conn.lock().unwrap();
         let mut stmt = try!(conn.prepare_cached("UPDATE commands SET name = :new_name, url = :new_url WHERE name = :name"));
