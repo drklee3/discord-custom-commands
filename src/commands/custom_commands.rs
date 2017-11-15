@@ -39,14 +39,23 @@ command!(commands(ctx, msg, _args) {
 
     let commands = try!(db.all());
 
-    let mut contents = "```Available Commands:\n".to_string();
+    let mut contents = "Available Commands:\n```".to_string();
     for cmd in commands {
             let _ = write!(contents, "{}\n", cmd.name);
     }
 
     let _ = write!(contents, "```");
 
-    let _ = msg.channel_id.say(&contents);
+    let dm = match msg.author.create_dm_channel() {
+        Ok(val) => val,
+        Err(why) => {
+            let _ = msg.channel_id.say("Failed to send DM, maybe you don't have them enabled?");
+            return Ok(());
+        }
+    };
+
+    let _ = dm.say(&contents);
+    let _ = msg.channel_id.say(":mailbox_with_mail: Sent you a DM with the commands list.");
 });
 
 command!(top(ctx, msg, _args) {
