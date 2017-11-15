@@ -33,18 +33,69 @@ fn has_permission(msg: &Message) -> bool {
     }
 }
 
+// splits a string that might be too long
+fn split_message(msg: &str, prepend: Option<&str>, with_code_block: bool) -> Vec<String> {
+    let split = msg.split("\n");
+    let mut vec = Vec::new();
+    let mut single_msg = String::new();
+
+    // add text in beginning before code blocks
+    match prepend {
+        Some(val) => {
+            single_msg.push_str(&val);
+        },
+        None => {},
+    };
+
+    if with_code_block {
+        single_msg.push_str("\n```"); // add starting code block
+    }
+
+    for s in split {
+        single_msg.push_str("\n"); // re-add new line at end
+
+        // will overflow, move to next msg (in bytes) + 6 just in case?
+        if single_msg.len() + s.len() + 6 > 4000 {
+            // add closing code block
+            if with_code_block {
+                single_msg.push_str("```");
+            }
+
+            vec.push(single_msg.clone());   // push the full string to vec
+            single_msg.clear();     // reset single message
+
+            // start new code block 
+            if with_code_block {
+                single_msg.push_str("```\n");
+            }
+        }
+
+        // append the next line
+        single_msg.push_str(s);
+    }
+
+    // push the remaining string
+    if !single_msg.is_empty() {
+        if with_code_block {
+            single_msg.push_str("```"); // add closing code block
+        }
+
+        vec.push(single_msg);
+    }
+
+    vec
+}
+
 command!(commands(ctx, msg, _args) {
     let mut data = ctx.data.lock();
     let db = data.get_mut::<sqlite::Database>().unwrap();
 
     let commands = try!(db.all());
 
-    let mut contents = "Available Commands:\n```".to_string();
+    let mut contents = String::new();
     for cmd in commands {
         let _ = write!(contents, "{}\n", cmd.name);
     }
-
-    let _ = write!(contents, "```");
 
     let dm = match msg.author.create_dm_channel() {
         Ok(val) => val,
@@ -54,7 +105,11 @@ command!(commands(ctx, msg, _args) {
         }
     };
 
-    let _ = dm.say(&contents);
+    let messages = split_message(&contents, Some("Available Commands:"), true);
+
+    for msg in messages {
+        let _ = dm.say(&msg);
+    }
 
     if !msg.is_private() {
         let _ = msg.channel_id.say(":mailbox_with_mail: Sent you a DM with the commands list.");
