@@ -48,14 +48,17 @@ command!(commands(ctx, msg, _args) {
 
     let dm = match msg.author.create_dm_channel() {
         Ok(val) => val,
-        Err(why) => {
+        Err(_) => {
             let _ = msg.channel_id.say("Failed to send DM, maybe you don't have them enabled?");
             return Ok(());
         }
     };
 
     let _ = dm.say(&contents);
-    let _ = msg.channel_id.say(":mailbox_with_mail: Sent you a DM with the commands list.");
+
+    if !msg.is_private() {
+        let _ = msg.channel_id.say(":mailbox_with_mail: Sent you a DM with the commands list.");
+    }
 });
 
 command!(top(ctx, msg, _args) {
