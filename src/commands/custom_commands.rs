@@ -301,14 +301,19 @@ command!(import(ctx, msg, args) {
     let db = data.get_mut::<sqlite::Database>().unwrap();
 
     let _ = msg.channel_id.say(helpers::get_info_f("import_started", &[&imported.commands.len().to_string()]));
+    let mut existing = 0;
 
     for (key, value) in imported.commands.iter() {
         if !try!(db.is_command(&key)) {
             try!(db.add(&key, &value.as_str().unwrap().to_string(), msg.author.id.0));
         } else {
-            let _ = msg.channel_id.say(helpers::get_error_f("import", &[&key.to_string()]));
+            existing += 1;
         }
     }
 
-    let _ = msg.channel_id.say(helpers::get_info("import_finished"));
+    if existing > 0 {
+        let _ = msg.channel_id.say(helpers::get_error_f("import_existing", &[&existing.to_string()]));
+    } else {
+        let _ = msg.channel_id.say(helpers::get_info("import_finished"));
+    }
 });

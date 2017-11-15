@@ -13,7 +13,7 @@
     "download_attachment": "Error downloading attachment: {:?}",
     "utf8": "Invalid UTF-8 sequence: {}",
     "json": "Error parsing JSON: {}",
-    "import": "Error when importing `{}`: Command already exists.",
+    "import_existing": "Finished import.  There were {} commands that already exist.",
     "search_no_results": "No results found.",
     "command_edit_no_permission": "You do not have permission to edit this command!"
   }
