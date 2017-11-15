@@ -11,19 +11,19 @@ use helpers;
 
 fn has_permission(msg: &Message) -> bool {
     let guild = match msg.guild() {
-            Some(guild) => guild,
-            None => {
-                    warn!("Couldn't get message guild!");
+        Some(guild) => guild,
+        None => {
+            warn!("Couldn't get message guild!");
 
-                    return false;
-            }
+            return false;
+        }
     };
     let guild = guild.read().unwrap();
 
     // fetch member
     let member = match guild.members.get(&msg.author.id) {
-            Some(member) => member,
-            None => return false
+        Some(member) => member,
+        None => return false
     };
     // check if has perm
     if let Ok(permissions) = member.permissions() {
@@ -41,7 +41,7 @@ command!(commands(ctx, msg, _args) {
 
     let mut contents = "Available Commands:\n```".to_string();
     for cmd in commands {
-            let _ = write!(contents, "{}\n", cmd.name);
+        let _ = write!(contents, "{}\n", cmd.name);
     }
 
     let _ = write!(contents, "```");
@@ -72,7 +72,7 @@ command!(top(ctx, msg, _args) {
     let commands = commands.iter().take(10);
 
     for cmd in commands {
-            let _ = write!(contents, "{} - {}\n", cmd.stat, cmd.name);
+        let _ = write!(contents, "{} - {}\n", cmd.stat, cmd.name);
     }
 
     let _ = write!(contents, "```");
@@ -90,7 +90,7 @@ command!(add(ctx, msg, args) {
             let _ = msg.channel_id.say(helpers::get_error("home_guild"));
             return Ok(());
         }
-    } else { // return if no guild found
+    } else { // return if no guild found (maybe in dms?)
         let _ = msg.channel_id.say(helpers::get_error("home_guild"));
         return Ok(()); 
     }
@@ -219,25 +219,25 @@ command!(stat(ctx, msg, args) {
     let timestamp = Utc.timestamp(cmd.created as i64, 0).format("%Y-%m-%d %H:%M:%S").to_string();
 
     let _ = msg.channel_id.send_message(|m| m
-            .embed(|e| e
-                .title(format!("Stats for {}", name))
-                .field(|f| f
-                    .name("Response")
-                    .value(&cmd.url)
-                    .inline(false)
-                )
-                .field(|f| f
-                    .name("Times used")
-                    .value(&cmd.stat)
-                )
-                .field(|f| f
-                    .name("Added on")
-                    .value(timestamp)
-                )
-                .field(|f| f
-                    .name("Added by")
-                    .value(format!("<@{}>", &cmd.owner)
-                ))));
+        .embed(|e| e
+            .title(format!("Stats for {}", name))
+            .field(|f| f
+                .name("Response")
+                .value(&cmd.url)
+                .inline(false)
+            )
+            .field(|f| f
+                .name("Times used")
+                .value(&cmd.stat)
+            )
+            .field(|f| f
+                .name("Added on")
+                .value(timestamp)
+            )
+            .field(|f| f
+                .name("Added by")
+                .value(format!("<@{}>", &cmd.owner)
+            ))));
 });
 
 command!(search(ctx, msg, args) {
