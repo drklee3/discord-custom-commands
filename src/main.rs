@@ -16,7 +16,6 @@ extern crate serde_json;
 
 #[macro_use]
 extern crate lazy_static;
-extern crate eval;
 extern crate reqwest;
 
 mod commands;
