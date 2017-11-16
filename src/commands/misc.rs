@@ -13,8 +13,11 @@ command!(play(_ctx, msg, args) {
     // check if using code block
     if !code.starts_with("```") || !code.ends_with("```") {
         let _ = msg.channel_id.say("Missing code block");
+        let _ = msg.react("❌");
         return Ok(());
     }
+
+    let _ = msg.react("👌");
 
     // clean up input
     code = code.replace("```rust", "");

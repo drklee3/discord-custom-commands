@@ -389,6 +389,8 @@ command!(import(ctx, msg, args) {
     let mut data = ctx.data.lock();
     let db = data.get_mut::<sqlite::Database>().unwrap();
 
+    let _ = msg.react("👌");
+
     let _ = msg.channel_id.say(helpers::get_info_f("import_started", &[&imported.commands.len().to_string()]));
     let mut existing = 0;
 
