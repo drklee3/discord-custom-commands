@@ -309,7 +309,7 @@ command!(search(ctx, msg, args) {
 
     let results = try!(db.search(&search));
 
-    let mut contents = "```Search Results:\n".to_string();
+    let mut contents = String::new();
 
     if results.len() == 0 {
         let _ = msg.channel_id.say(helpers::get_error("search_no_results"));
@@ -317,12 +317,34 @@ command!(search(ctx, msg, args) {
     }
 
     for cmd in results {
-            let _ = write!(contents, "- {}\n", name=cmd.name);
+            let _ = write!(contents, "{}\n", name=cmd.name);
     }
 
-    let _ = write!(contents, "```");
+    let messages = split_message(&contents, Some("Search Results:"), true);
 
-    let _ = msg.channel_id.say(&contents);
+    // only 1 short message
+    if messages.len() == 1 && messages[0].len() <= 300 {
+        let _ = msg.channel_id.say(&messages[0]);
+        return Ok(());
+    }
+
+    let dm = match msg.author.create_dm_channel() {
+        Ok(val) => val,
+        Err(_) => {
+            let _ = msg.channel_id.say("Failed to send DM, maybe you don't have them enabled?");
+            return Ok(());
+        }
+    };
+
+    // send results
+    for msg in messages {
+        let _ = dm.say(&msg);
+    }
+
+    // send notification in channel
+    if !msg.is_private() {
+        let _ = msg.channel_id.say(":mailbox_with_mail: High number of search results, sent you a DM.");
+    }
 });
 
 
