@@ -40,7 +40,11 @@ command!(play(_ctx, msg, args) {
     match res {
         Ok(mut val) => {
             let res_obj: Response = val.json()?;
-            let _ = msg.channel_id.say(format!("```rust\n{}\n{}\n```", res_obj.stderr, res_obj.stdout));
+
+            let mut clean = res_obj.stdout.replace("@", "@\u{200B}");
+            clean = clean.replace("`", "'");
+
+            let _ = msg.channel_id.say(format!("```rust\n{}\n{}\n```", res_obj.stderr, clean));
         },
         Err(e) => {
             let _ = msg.channel_id.say(format!("Error: {}", e));
