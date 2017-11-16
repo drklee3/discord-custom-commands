@@ -1,6 +1,6 @@
 [package]
 name = "rust-custom-commands"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["drklee3 <drklee3@users.noreply.github.com>"]
 
 [dependencies]
