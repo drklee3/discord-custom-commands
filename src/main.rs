@@ -66,7 +66,7 @@ impl EventHandler for Handler {
             println!(
                 "Got custom command '{}' by user '{}'",
                 command.name,
-                msg.author.name
+                msg.author.tag()
             );
 
             if let Err(why) = msg.channel_id.say(command.url) {
@@ -117,7 +117,7 @@ fn main() {
                 println!(
                     "Got command '{}' by user '{}'",
                     command_name,
-                    msg.author.name
+                    msg.author.tag()
                 );
 
                 true // if `before` returns false, command processing doesn't happen.
