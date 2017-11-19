@@ -107,11 +107,14 @@ fn main() {
     client.with_framework(
         StandardFramework::new()
             .configure(|c| {
-                c.prefix(PREFIX).owners(
+                c.prefix(PREFIX)
+                .owners(
                     vec![UserId(150443906511667200)]
                         .into_iter()
                         .collect(),
                 )
+                .ignore_bots(true)
+                .on_mention(true)
             })
             .before(|_ctx, msg, command_name| {
                 println!(
