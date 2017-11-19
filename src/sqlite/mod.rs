@@ -30,6 +30,11 @@ pub fn connect() -> Result<Database, Error> {
                       stat            INTEGER,
                       created         INTEGER
                       )", &[]));
+
+    try!(conn.execute("CREATE TABLE IF NOT EXISTS servers (
+                      id              INTEGER PRIMARY KEY,
+                      prefix          TEXT NOT NULL
+                      )", &[]));
     
     let db = Database {conn: Mutex::new(conn)};
 
